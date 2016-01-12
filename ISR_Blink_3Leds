@@ -1,9 +1,27 @@
 
 #include <TimerOne.h>  // can also use TimerThree instead (Mega ONLY!)
 
-// Many Thanks go to --> https://www.pjrc.com/teensy/td_libs_TimerOne.html
+// Many Thanks go to --> https://github.com/PaulStoffregen/TimerOne
 // Note: we're only using it for a cyclic interrupt source
 
+//------------------------------------------------------------------------
+//  Arduino MultiTasking w/o Millis
+
+//  Using a Timer1 interrupt to process multiple 
+//  global "software" counters.
+
+// This example works only on the Arduino Mega,
+// but can be modified for the other boards.
+
+// The circuit:
+// *  Allows 'cooperative' multitasking while maintaining 'timing.
+// *  Eliminates the '53' day overflow w. Millis
+
+// created 07 Jan. 2016
+// by Vic Bojarski
+// This example code is in the public domain.
+ //------------------------------------------------------------------------
+ 
 //--------------------------------------------------------------------
 // These are "started" by setting them to a 'time' value
 // max value is 65535 times 0.1 sec --> (6553 secs)
@@ -11,9 +29,9 @@
 // (Don't confuse that with the hardware 16-bit resolution)
 //--------------------------------------------------------------------
 
-volatile unsigned int TimR1 = 0 ;  
-volatile unsigned int TimR2 = 0 ;
-volatile unsigned int TimR3 = 0 ;
+ unsigned int volatile TimR1 = 0 ;  
+ unsigned int volatile TimR2 = 0 ;
+ unsigned int volatile TimR3 = 0 ;
 
 void setup()
 {
@@ -33,7 +51,7 @@ void loop()
 {
   // Main code loop
   // NOTE: instead of the "digitalWrite" a more
-  //        complex subroutine could be called.
+  //  complex subroutine ( or 'State Machine' ) could be called.
 
   if (!TimR1) { // Is TimR1 == 0 ?
     digitalWrite( 22,  digitalRead( 22 ) ^ 1 ); // XOR and output
@@ -56,7 +74,7 @@ void loop()
 /// ISR Timer Routine
 /// Please note: BY DECREMENTING WE AVOID THE 'OVERFLOW' PROBLEM.
 ///              EACH TIMER IS 'SELF-RESETTING'.
-/// These can me made 'unsigned long' if more time is needed or the
+/// These can me made 'unsigned long' if more time (resolution) is needed or the
 /// interrupt rate is higher.
 /// --------------------------
 void timerIsr()
